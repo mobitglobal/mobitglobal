@@ -1,0 +1,22 @@
+[Unit]
+Description=Mobit Global's distributed currency daemon
+After=network.target
+
+[Service]
+User=mobitglobalcore
+Group=mobitglobalcore
+
+Type=forking
+PIDFile=/var/lib/mobitglobald/mobitglobald.pid
+ExecStart=/usr/bin/mobitglobald -daemon -pid=/var/lib/mobitglobald/mobitglobald.pid \
+-conf=/etc/mobitglobalcore/mobitglobal.conf -datadir=/var/lib/mobitglobald -disablewallet
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
