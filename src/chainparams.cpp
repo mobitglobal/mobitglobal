@@ -140,9 +140,9 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0x000004d548c7f467707478e9122e7347ce69cb92d6289db47bd1ade42d9ae45a"));
 		assert(genesis.hashMerkleRoot == uint256S("0x17f606cf3ec3991bbc9aec34a1f5355469c53013d83d627a62f6fb8bbcd35e9b"));
 		// By default assume that the signatures in ancestors of this block are valid.
-		consensus.defaultAssumeValid = uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"); // TODO: update
+		consensus.defaultAssumeValid = uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"); // TODO: update #3
 		// The best chain should have at least this much work.
-		consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000400040"); // TODO: update
+		consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000400040"); // TODO: update #3
 
         // addresses start with 'M'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 50);
@@ -169,7 +169,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "0470274e31a36fb3cde25cbc616b9cdd68ef1dcbee40c62f5f067fbc52bc8c9fedb9da9ec7ca6c6b2d09ffef4dab1ee891c0b40cdd0129a4b672e6f6089f0d03d1";
+        strSporkPubKey = "043605c3bb57b3f1ca12fd986bde03e88beb41de215fefd280481e749a44ded6088518fee1198b75e19d6e8285fdc34023aba985ac73b78aa78db3bf06006f3256";
 
 #if (_MSC_VER < 9999) /* MSVC 2017 still not full C99 compliant*/
 		checkpointData =
