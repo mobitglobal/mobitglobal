@@ -173,23 +173,16 @@ public:
 
 #if (_MSC_VER < 9999) /* MSVC 2017 still not full C99 compliant*/
 		checkpointData =
-		{
-			{boost::assign::map_list_of(3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e")),},
-			1531175260, // * UNIX timestamp of last checkpoint block
-            3,      // * total number of transactions between genesis and last checkpoint
-                        //   (the tx=... number in the SetBestChain debug.log lines)
-            5000        // * estimated number of transactions per day after checkpoint
-        };
 #else
-		checkpointData = (CCheckpointData){
-			{},
-			//boost::assign::map_list_of (3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e")),
-				1531175260, // * UNIX timestamp of last checkpoint block
-			3,      // * total number of transactions between genesis and last checkpoint
-						//   (the tx=... number in the SetBestChain debug.log lines)
-			5000        // * estimated number of transactions per day after checkpoint
-		};
+		checkpointData = (CCheckpointData) 
 #endif
+			{
+				boost::assign::map_list_of(3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e")),
+				1531175260, // * UNIX timestamp of last checkpoint block
+				3,      // * total number of transactions between genesis and last checkpoint
+				//   (the tx=... number in the SetBestChain debug.log lines)
+				5000        // * estimated number of transactions per day after checkpoint
+			};
     }
 };
 static CMainParams mainParams;
