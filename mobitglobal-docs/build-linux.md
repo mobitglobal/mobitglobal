@@ -3,7 +3,7 @@ To build on a clear Linux server (Ubuntu 16.04)
 
 The build script will instruct on process to install dependecies, retrieve latest source and perform a full build for Linux
 
-##1. Prepare dependencies
+## 1. Prepare dependencies
 
 sudo add-apt-repository ppa:bitcoin/bitcoin
 
@@ -19,11 +19,11 @@ sudo apt-get install libssl-dev libevent-dev libboost-all-dev libdb4.8-dev libdb
 
 sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler
 
-##2. Get latest source from Git
+## 2. Get latest source from Git
 
 git clone https://github.com/mobitglobal/mobitglobal build
 
-##3. Perform build of source
+## 3. Perform build of source
 
 cd build
 
@@ -46,7 +46,7 @@ cp build/src/mobitglobal-tx .
 cp build/src/qt/mobitglobal-qt .
 
 
-##4. Remove debug symbols (optional, improves performance)
+## 4. Remove debug symbols (optional, improves performance)
 
 strip mobitglobald
 
@@ -56,6 +56,6 @@ strip mobitglobal-qt
 
 strip mobitglobal-tx
 
-##5. Tidy up
+## 5. Tidy up
 
 rm -rf build
