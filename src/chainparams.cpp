@@ -158,7 +158,30 @@ public:
         // BIP44 coin type is '5'
         nExtCoinType = 5;
 
-		//vSeeds.push_back(CDNSSeedData("desc", "fqdn")); // TODO: add seeds
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed01.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed02.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed03.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed04.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed05.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed06.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed07.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed08.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed09.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed10.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed11.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed12.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed13.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed14.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed15.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed16.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed17.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed18.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed19.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed20.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed21.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed22.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed23.mobitglobal.net"));
+		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed24.mobitglobal.net"));
 		vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
         fMiningRequiresPeers = true;
@@ -177,11 +200,14 @@ public:
 		checkpointData = (CCheckpointData) 
 #endif
 			{
-				boost::assign::map_list_of(3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e")),
-				1531175260, // * UNIX timestamp of last checkpoint block
-				3,      // * total number of transactions between genesis and last checkpoint
+			boost::assign::map_list_of
+				(   3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"))
+				(5000, uint256S("0x000000000a4f5cea42e85e44735287b997a99adf05f2a9d1c56ccdfa8705a2a7"))
+				(5800, uint256S("0x00000000111452f6364e9c9c7e9ac2f10f44b505e6bacc7815be9354cb62f13f")),
+				1532087338, // * UNIX timestamp of last checkpoint block
+				7677,      // * total number of transactions between genesis and last checkpoint
 				//   (the tx=... number in the SetBestChain debug.log lines)
-				5000        // * estimated number of transactions per day after checkpoint
+				500        // * estimated number of transactions per day after checkpoint
 			};
     }
 };

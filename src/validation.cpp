@@ -3295,11 +3295,20 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
     AssertLockHeld(cs_main);
     // Check for duplicate
     uint256 hash = block.GetHash();
+	uint256 prevhash = block.hashPrevBlock;
     BlockMap::iterator miSelf = mapBlockIndex.find(hash);
     CBlockIndex *pindex = NULL;
 
     // TODO : ENABLE BLOCK CACHE IN SPECIFIC CASES
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
+		
+		// orphan known bad forks
+		if(
+			prevhash == uint256S("0x00000000060f2cb1caa0a1872e5aee80bfc71a25eb666fc03cf74ad61fb438a8") && 
+			hash == uint256S("0x0000000005652e37deeb0a3c6e69555bcf184e3f7cd503b40444e9ea45831fba") // 4303
+			){ 
+			return state.DoS(100, error("%s: orphan known bad forks", __func__), REJECT_INVALID, "bad-fork");
+		}
 
         if (miSelf != mapBlockIndex.end()) {
             // Block header is already known.
