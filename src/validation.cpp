@@ -3082,9 +3082,6 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bool fCheckMerkleRoot)
 {
     // These are checks that are independent of context.
-    if ( !CheckNetFilter51Hash(block)) {
-    }
-
     if (block.fChecked)
         return true;
 
