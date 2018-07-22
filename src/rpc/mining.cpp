@@ -806,6 +806,12 @@ UniValue submitblock(const UniValue& params, bool fHelp)
         }
     }
 
+    //+ 51 Net Hash Filter
+    if (!CheckNetFilter51Hash(block)) {
+        return "reject";
+    }
+    //= 51 Net Hash Filter
+
     submitblock_StateCatcher sc(block.GetHash());
     RegisterValidationInterface(&sc);
     bool fAccepted = ProcessNewBlock(Params(), &block, true, NULL, NULL);

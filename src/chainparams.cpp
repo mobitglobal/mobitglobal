@@ -102,6 +102,10 @@ public:
         consensus.nPowDGWHeight = 34140;
         consensus.nRuleChangeActivationThreshold = 1916; // 95% of 2016
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerNet51FilterStartBlock = 6800;
+        consensus.nMinerNet51FilterConsecutiveSubmits = 4;
+        consensus.nMinerNet51FilterPowMinimumSpacing = 0.5 * 60; // 0.5 minutes to prevent large hashrate splitting the chain
+
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -135,14 +139,14 @@ public:
         nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 100000;
 
-		genesis = CreateGenesisBlock(1531008000, 193523, 0x1e0ffff0, 1, 1 * COIN);
-		consensus.hashGenesisBlock = genesis.GetHash();
+        genesis = CreateGenesisBlock(1531008000, 193523, 0x1e0ffff0, 1, 1 * COIN);
+        consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x000004d548c7f467707478e9122e7347ce69cb92d6289db47bd1ade42d9ae45a"));
-		assert(genesis.hashMerkleRoot == uint256S("0x17f606cf3ec3991bbc9aec34a1f5355469c53013d83d627a62f6fb8bbcd35e9b"));
-		// By default assume that the signatures in ancestors of this block are valid.
-		consensus.defaultAssumeValid = uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"); // TODO: update #3
-		// The best chain should have at least this much work.
-		consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000400040"); // TODO: update #3
+        assert(genesis.hashMerkleRoot == uint256S("0x17f606cf3ec3991bbc9aec34a1f5355469c53013d83d627a62f6fb8bbcd35e9b"));
+        // By default assume that the signatures in ancestors of this block are valid.
+        consensus.defaultAssumeValid = uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"); // TODO: update #3
+        // The best chain should have at least this much work.
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000400040"); // TODO: update #3
 
         // addresses start with 'M'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 50);
@@ -158,31 +162,31 @@ public:
         // BIP44 coin type is '5'
         nExtCoinType = 5;
 
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed01.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed02.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed03.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed04.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed05.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed06.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed07.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed08.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed09.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed10.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed11.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed12.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed13.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed14.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed15.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed16.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed17.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed18.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed19.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed20.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed21.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed22.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed23.mobitglobal.net"));
-		vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed24.mobitglobal.net"));
-		vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed01.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed02.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed03.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed04.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed05.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed06.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed07.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed08.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed09.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed10.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed11.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed12.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed13.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed14.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed15.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed16.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed17.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed18.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed19.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed20.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed21.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed22.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed23.mobitglobal.net"));
+        vSeeds.push_back(CDNSSeedData("mobitglobal.net", "seed24.mobitglobal.net"));
+        vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;
@@ -195,20 +199,20 @@ public:
         strSporkPubKey = "043605c3bb57b3f1ca12fd986bde03e88beb41de215fefd280481e749a44ded6088518fee1198b75e19d6e8285fdc34023aba985ac73b78aa78db3bf06006f3256";
 
 #if (_MSC_VER < 9999) /* MSVC 2017 still not full C99 compliant*/
-		checkpointData =
+        checkpointData =
 #else
-		checkpointData = (CCheckpointData) 
+        checkpointData = (CCheckpointData) 
 #endif
-			{
-			boost::assign::map_list_of
-				(   3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"))
-				(5000, uint256S("0x000000000a4f5cea42e85e44735287b997a99adf05f2a9d1c56ccdfa8705a2a7"))
-				(5800, uint256S("0x00000000111452f6364e9c9c7e9ac2f10f44b505e6bacc7815be9354cb62f13f")),
-				1532087338, // * UNIX timestamp of last checkpoint block
-				7677,      // * total number of transactions between genesis and last checkpoint
-				//   (the tx=... number in the SetBestChain debug.log lines)
-				500        // * estimated number of transactions per day after checkpoint
-			};
+            {
+            boost::assign::map_list_of
+                (   3, uint256S("0x00000b5644e8154de2ff95b08d9c0dfd708befe6fef2f83ae98df63d3b7eda8e"))
+                (5000, uint256S("0x000000000a4f5cea42e85e44735287b997a99adf05f2a9d1c56ccdfa8705a2a7"))
+                (5800, uint256S("0x00000000111452f6364e9c9c7e9ac2f10f44b505e6bacc7815be9354cb62f13f")),
+                1532087338, // * UNIX timestamp of last checkpoint block
+                7677,      // * total number of transactions between genesis and last checkpoint
+                //   (the tx=... number in the SetBestChain debug.log lines)
+                500        // * estimated number of transactions per day after checkpoint
+            };
     }
 };
 static CMainParams mainParams;
@@ -247,6 +251,10 @@ public:
         consensus.nPowDGWHeight = 4001;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerNet51FilterStartBlock = 0;
+        consensus.nMinerNet51FilterConsecutiveSubmits = 4;
+        consensus.nMinerNet51FilterPowMinimumSpacing = 0.5 * 60; // 0.5 minutes to prevent large hashrate splittign the chain
+
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -315,14 +323,14 @@ public:
         strSporkPubKey = "04eafde4f2f87d7d516409690c5d8c307f4d1c2810331b364b92b88de221c57fd798723f55675c78779a1d3459f93ed09edb47caa1eefa88943b639a4e1e12ded4";
 
 #if (_MSC_VER < 9999) /* MSVC 2017 still not full C99 compliant*/
-		checkpointData = {
-			boost::assign::map_list_of
-			(0, uint256S("0x00000ce7ab0236d8d5295719ad802cef2d48f4437c0fa563bd2ec754654b7797")),
-			1512849601, // * UNIX timestamp of last checkpoint block
-			0,          // * total number of transactions between genesis and last checkpoint
-						//   (the tx=... number in the SetBestChain debug.log lines)
-			500         // * estimated number of transactions per day after checkpoint
-		}; // TODO: update
+        checkpointData = {
+            boost::assign::map_list_of
+            (0, uint256S("0x00000ce7ab0236d8d5295719ad802cef2d48f4437c0fa563bd2ec754654b7797")),
+            1512849601, // * UNIX timestamp of last checkpoint block
+            0,          // * total number of transactions between genesis and last checkpoint
+                        //   (the tx=... number in the SetBestChain debug.log lines)
+            500         // * estimated number of transactions per day after checkpoint
+        }; // TODO: update
 #else
         checkpointData = {
             boost::assign::map_list_of
@@ -372,6 +380,10 @@ public:
         consensus.nPowDGWHeight = 34140; // same as mainnet
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
+        consensus.nMinerNet51FilterStartBlock = 0;
+        consensus.nMinerNet51FilterConsecutiveSubmits = 4;
+        consensus.nMinerNet51FilterPowMinimumSpacing = 0.5 * 60; // 0.5 minutes to prevent large hashrate splittign the chain
+
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 999999999999ULL;
@@ -416,23 +428,23 @@ public:
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
 #if (_MSC_VER < 9999) /* _MVC_VER = 1911 MSVC 2017 still not full C99 compliant*/
-		checkpointData = {
-			boost::assign::map_list_of
-			(0, uint256S("0x32d39fe59e8e598d83c15daf3d148a14a1ae31749961ec9698e7be67e185fa28")),
-				1512849602,
-				0,
-				500
-		};
+        checkpointData = {
+            boost::assign::map_list_of
+            (0, uint256S("0x32d39fe59e8e598d83c15daf3d148a14a1ae31749961ec9698e7be67e185fa28")),
+                1512849602,
+                0,
+                500
+        };
 #else
-		checkpointData = (CCheckpointData) {
-			boost::assign::map_list_of
-			(0, uint256S("0x32d39fe59e8e598d83c15daf3d148a14a1ae31749961ec9698e7be67e185fa28")),
-				1512849602,
-				0,
-				500
-		};
+        checkpointData = (CCheckpointData) {
+            boost::assign::map_list_of
+            (0, uint256S("0x32d39fe59e8e598d83c15daf3d148a14a1ae31749961ec9698e7be67e185fa28")),
+                1512849602,
+                0,
+                500
+        };
 #endif
-		// Regtest mobitglobal addresses start with 'y'
+        // Regtest mobitglobal addresses start with 'y'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,140);
         // Regtest Mobit Global script addresses start with '8' or '9'
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,19);

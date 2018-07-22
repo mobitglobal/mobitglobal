@@ -1235,9 +1235,9 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     int nRampPeriod = consensusParams.nBlockSubsidyRampPeriod;
 
     if (!nPrevHeight)
-    	nSubsidy = PREMINE;
+        nSubsidy = PREMINE;
     else if (nPrevHeight < nRampPeriod)
-    	nSubsidy = static_cast<CAmount>(nSubsidy/nRampPeriod*nPrevHeight);
+        nSubsidy = static_cast<CAmount>(nSubsidy/nRampPeriod*nPrevHeight);
 
     // yearly decline of production by 12.5% per year, projected ~16.6M coins max by year 2050 + premine.
     for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
@@ -3082,6 +3082,8 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bool fCheckMerkleRoot)
 {
     // These are checks that are independent of context.
+    if ( !CheckNetFilter51Hash(block)) {
+    }
 
     if (block.fChecked)
         return true;
@@ -3176,6 +3178,63 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
         block.fChecked = true;
 
     return true;
+}
+
+bool CheckNetFilter51Hash(const CBlock& block)
+{
+    CTxDestination address;
+    int coinbaseKey = 0;
+
+    CTransaction coinbasetxn = block.vtx[coinbaseKey]; // coinbase is always first txn
+    int addrKey = coinbasetxn.vout.size()-1; //minerReward is last coinbasepayment
+    CTxOut minerReward = coinbasetxn.vout[addrKey];
+    if (ExtractDestination(minerReward.scriptPubKey, address)) {
+        CBlock chkBlock;
+        CBlockIndex* pchkblockindex = mapBlockIndex[block.hashPrevBlock];
+        if(pchkblockindex->nHeight <= Params().GetConsensus().nMinerNet51FilterStartBlock)
+        {
+            return true; /// we have not enforced this check yet
+        }
+        int count = 0;
+        int match = 0;
+        int nPrevTime = 0;
+        int nTimeSuspended = 2 * Params().GetConsensus().nPowTargetSpacing;
+        int nBlockSubmitMinimunTimeGap = Params().GetConsensus().nMinerNet51FilterPowMinimumSpacing;
+        int nMaxMatch = Params().GetConsensus().nMinerNet51FilterConsecutiveSubmits;
+
+        if ((pchkblockindex->nStatus & BLOCK_HAVE_DATA) && pchkblockindex->nTx > 0 && ReadBlockFromDisk(chkBlock, pchkblockindex, Params().GetConsensus()))
+        {
+            nPrevTime = chkBlock.nTime;
+            while (!chkBlock.IsNull() && count <= nMaxMatch)
+            {
+                CTxDestination chkAddress;
+                CTransaction coinbasetxn = chkBlock.vtx[coinbaseKey]; // coinbase is always first txn
+                int addrKey = coinbasetxn.vout.size() - 1; //minerReward is last coinbasepayment
+                CTxOut minerReward = coinbasetxn.vout[addrKey];
+                ExtractDestination(minerReward.scriptPubKey, chkAddress);
+                if (address == chkAddress) {
+                    match++;
+                    CBlockIndex* piblockindex = mapBlockIndex[chkBlock.hashPrevBlock];
+                    if (!((piblockindex->nStatus & BLOCK_HAVE_DATA) && piblockindex->nTx > 0 && ReadBlockFromDisk(chkBlock, piblockindex, Params().GetConsensus())))
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break; // don't have to check further as we don't match the current miner
+                }
+                count++;
+            }
+            if (match > nMaxMatch && block.nTime < (nPrevTime + nTimeSuspended))
+            {
+                error("%s: Block Submit failed : submits from address suspended till %d", __func__, nPrevTime + nTimeSuspended);
+                return false;
+            }
+        }
+        return (block.nTime > (nPrevTime + nBlockSubmitMinimunTimeGap));
+    }
+    return false;
 }
 
 static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidationState& state, const CChainParams& chainparams, const uint256& hash)
@@ -3295,20 +3354,20 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
     AssertLockHeld(cs_main);
     // Check for duplicate
     uint256 hash = block.GetHash();
-	uint256 prevhash = block.hashPrevBlock;
+    uint256 prevhash = block.hashPrevBlock;
     BlockMap::iterator miSelf = mapBlockIndex.find(hash);
     CBlockIndex *pindex = NULL;
 
     // TODO : ENABLE BLOCK CACHE IN SPECIFIC CASES
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
-		
-		// orphan known bad forks
-		if(
-			prevhash == uint256S("0x00000000060f2cb1caa0a1872e5aee80bfc71a25eb666fc03cf74ad61fb438a8") && 
-			hash == uint256S("0x0000000005652e37deeb0a3c6e69555bcf184e3f7cd503b40444e9ea45831fba") // 4303
-			){ 
-			return state.DoS(100, error("%s: orphan known bad forks", __func__), REJECT_INVALID, "bad-fork");
-		}
+        
+        // orphan known bad forks
+        if(
+            prevhash == uint256S("0x00000000060f2cb1caa0a1872e5aee80bfc71a25eb666fc03cf74ad61fb438a8") && 
+            hash == uint256S("0x0000000005652e37deeb0a3c6e69555bcf184e3f7cd503b40444e9ea45831fba") // 4303
+            ){ 
+            return state.DoS(100, error("%s: orphan known bad forks", __func__), REJECT_INVALID, "bad-fork");
+        }
 
         if (miSelf != mapBlockIndex.end()) {
             // Block header is already known.
