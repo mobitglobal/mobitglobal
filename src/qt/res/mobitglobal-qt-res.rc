@@ -19,7 +19,7 @@ BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
             VALUE "CompanyName",        "Mobit Global"
-            VALUE "FileDescription",    "Mobit Global Core (GUI node for mobit Global)"
+            VALUE "FileDescription",    "Mobit Global Core (GUI node for Mobit Global)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "mobitglobal-qt"
             VALUE "LegalCopyright",     COPYRIGHT_STR

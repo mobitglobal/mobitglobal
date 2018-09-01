@@ -3195,7 +3195,7 @@ bool CheckNetFilter51Hash(const CBlock& block)
         int count = 0;
         int match = 0;
         int nPrevTime = 0;
-        int nTimeSuspended = 2 * Params().GetConsensus().nPowTargetSpacing;
+        int nTimeSuspended = Params().GetConsensus().nPowTargetSpacing;
         int nBlockSubmitMinimunTimeGap = Params().GetConsensus().nMinerNet51FilterPowMinimumSpacing;
         int nMaxMatch = Params().GetConsensus().nMinerNet51FilterConsecutiveSubmits;
 
