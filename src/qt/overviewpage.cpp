@@ -443,7 +443,7 @@ void OverviewPage::updateAdvancedPSUI(bool fShowAdvancedPSUI) {
 
     if (fLiteMode) return;
 
-    ui->framePrivateSend->setVisible(true);
+    ui->framePrivateSend->setVisible(privateSendClient.fEnablePrivateSend);
     ui->labelCompletitionText->setVisible(fShowAdvancedPSUI);
     ui->privateSendProgress->setVisible(fShowAdvancedPSUI);
     ui->labelSubmittedDenomText->setVisible(fShowAdvancedPSUI);
