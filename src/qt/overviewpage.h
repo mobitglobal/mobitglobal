@@ -40,7 +40,7 @@ public:
 public Q_SLOTS:
     void privateSendStatus();
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance,
-                    const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+                    const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance, const CAmount& priceBTC, const CAmount& priceUSD, const int64_t& priceUTC);
 
 Q_SIGNALS:
     void transactionClicked(const QModelIndex &index);
@@ -58,6 +58,9 @@ private:
     CAmount currentWatchOnlyBalance;
     CAmount currentWatchUnconfBalance;
     CAmount currentWatchImmatureBalance;
+    int64_t currentPriceUTC;
+    CAmount currentPriceBTC;
+    CAmount currentPriceUSD;
     int nDisplayUnit;
     bool fShowAdvancedPSUI;
 

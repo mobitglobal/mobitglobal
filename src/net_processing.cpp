@@ -1908,8 +1908,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
         bool fNewBlock = false;
         ProcessNewBlock(chainparams, &block, forceProcessing, NULL, &fNewBlock);
-        if (fNewBlock)
+        if (fNewBlock) {
             pfrom->nLastBlockTime = GetTime();
+        }
     }
 
 
@@ -2151,6 +2152,43 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 LogPrint("net", "Unparseable reject message received\n");
             }
         }
+    }
+    else if (strCommand == NetMsgType::FXPRICE) {
+
+        int64_t nPriceUTC;
+        CAmount nPriceBTC;
+        CAmount nPriceUSD;
+        vRecv >> nPriceUTC >> nPriceBTC >> nPriceUSD;
+        LogPrint("net", "FXPRICE (recv)-- node: %s, time: %d, btc: %d, usd: %d \n", pfrom->addr.ToString(), nPriceUTC, nPriceBTC, nPriceUSD);
+        pfrom->nPriceUTC = nPriceUTC;
+        pfrom->nPriceBTC = nPriceBTC;
+        pfrom->nPriceUSD = nPriceUSD;
+#ifdef ENABLE_WALLET
+        if (nPriceUTC != pwalletMain->GetPriceUTC())
+        {
+            pwalletMain->SetPriceUTC(nPriceUTC);
+        }
+        if (nPriceBTC != pwalletMain->GetPriceBTC())
+        {
+            pwalletMain->SetPriceBTC(nPriceBTC);
+    }
+        if (nPriceUSD != pwalletMain->GetPriceUSD())
+        {
+            pwalletMain->SetPriceUSD(nPriceUSD);
+        }
+#endif // ENABLE_WALLET
+        std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        {
+            if (pnode->nVersion >= PROTOCOL_VERSION && (pnode->nPriceUTC != nPriceUTC || pnode->nPriceBTC != nPriceBTC || pnode->nPriceUSD != nPriceUSD)) {
+                LogPrint("net", "FXPRICE (relay)-- node: %s, time: %d, btc: %d, usd: %d \n", pnode->addr.ToString(), nPriceUTC, nPriceBTC, nPriceUSD);
+                pnode->nPriceUTC = nPriceUTC;
+                pnode->nPriceBTC = nPriceBTC;
+                pnode->nPriceUSD = nPriceUSD;
+                connman.PushMessageWithVersion(pnode, PROTOCOL_VERSION, NetMsgType::FXPRICE, nPriceUTC, nPriceBTC, nPriceUSD);
+            }
+        }
+        connman.ReleaseNodeVector(vNodesCopy);
     }
     else
     {

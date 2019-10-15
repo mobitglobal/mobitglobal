@@ -60,7 +60,9 @@ public:
         MBGL,
         mMBGL,
         uMBGL,
-        duffs
+        duffs,
+        BTC,
+        USD
     };
 
     enum SeparatorStyle

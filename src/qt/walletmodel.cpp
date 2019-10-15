@@ -30,6 +30,7 @@
 
 #include <QDebug>
 #include <QSet>
+#include <QSettings>
 #include <QTimer>
 
 #include <boost/foreach.hpp>
@@ -103,6 +104,45 @@ CAmount WalletModel::getImmatureBalance() const
     return wallet->GetImmatureBalance();
 }
 
+int64_t WalletModel::getPriceUTC() const
+{
+    int64_t time = wallet->GetPriceUTC();
+    QSettings settings;
+    if(time > 0) {
+        settings.setValue("priceUTC", (qlonglong)time);
+    }
+    else {
+        time += settings.value("priceUTC", "0").toLongLong();
+    }
+    return time;
+}
+
+CAmount WalletModel::getPriceBTC() const
+{
+    CAmount price = wallet->GetPriceBTC();
+    QSettings settings;
+    if(price > 0) {
+        settings.setValue("priceBTC", (qlonglong)price);
+    }
+    else {
+        price += settings.value("priceBTC", "0").toLongLong();
+    }
+    return price;
+}
+
+CAmount WalletModel::getPriceUSD() const
+{
+    CAmount price = wallet->GetPriceUSD();
+    QSettings settings;
+    if(price > 0) {
+        settings.setValue("priceUSD", (qlonglong)price);
+    }
+    else {
+        price += settings.value("priceUSD", "0").toLongLong();
+    }
+    return price;
+}
+
 bool WalletModel::haveWatchOnly() const
 {
     return fHaveWatchOnly;
@@ -163,6 +203,9 @@ void WalletModel::checkBalanceChanged()
     CAmount newUnconfirmedBalance = getUnconfirmedBalance();
     CAmount newImmatureBalance = getImmatureBalance();
     CAmount newAnonymizedBalance = getAnonymizedBalance();
+    int64_t newPriceUTC = getPriceUTC();
+    CAmount newPriceBTC = getPriceBTC();
+    CAmount newPriceUSD = getPriceUSD();
     CAmount newWatchOnlyBalance = 0;
     CAmount newWatchUnconfBalance = 0;
     CAmount newWatchImmatureBalance = 0;
@@ -175,7 +218,8 @@ void WalletModel::checkBalanceChanged()
 
     if(cachedBalance != newBalance || cachedUnconfirmedBalance != newUnconfirmedBalance || cachedImmatureBalance != newImmatureBalance ||
         cachedAnonymizedBalance != newAnonymizedBalance || cachedTxLocks != nCompleteTXLocks ||
-        cachedWatchOnlyBalance != newWatchOnlyBalance || cachedWatchUnconfBalance != newWatchUnconfBalance || cachedWatchImmatureBalance != newWatchImmatureBalance)
+        cachedWatchOnlyBalance != newWatchOnlyBalance || cachedWatchUnconfBalance != newWatchUnconfBalance || cachedWatchImmatureBalance != newWatchImmatureBalance ||
+        cachedPriceBTC != newPriceBTC || cachedPriceUSD != newPriceUSD || cachedPriceUTC != newPriceUTC)
     {
         cachedBalance = newBalance;
         cachedUnconfirmedBalance = newUnconfirmedBalance;
@@ -185,8 +229,11 @@ void WalletModel::checkBalanceChanged()
         cachedWatchOnlyBalance = newWatchOnlyBalance;
         cachedWatchUnconfBalance = newWatchUnconfBalance;
         cachedWatchImmatureBalance = newWatchImmatureBalance;
+        cachedPriceUTC = newPriceUTC;
+        cachedPriceBTC = newPriceBTC;
+        cachedPriceUSD = newPriceUSD;
         Q_EMIT balanceChanged(newBalance, newUnconfirmedBalance, newImmatureBalance, newAnonymizedBalance,
-                            newWatchOnlyBalance, newWatchUnconfBalance, newWatchImmatureBalance);
+                            newWatchOnlyBalance, newWatchUnconfBalance, newWatchImmatureBalance, newPriceBTC, newPriceUSD, newPriceUTC);
     }
 }
 

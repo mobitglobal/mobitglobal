@@ -137,6 +137,39 @@ CPubKey CWallet::GenerateNewKey(uint32_t nAccountIndex, bool fInternal)
     return pubkey;
 }
 
+int64_t CWallet::GetPriceUTC()
+{
+    return nPriceUTC;
+}
+
+bool CWallet::SetPriceUTC(int64_t priceUTC)
+{
+    nPriceUTC = priceUTC;
+    return true;
+}
+
+CAmount CWallet::GetPriceBTC()
+{
+    return nPriceBTC;
+}
+
+bool CWallet::SetPriceBTC(CAmount priceBTC)
+{
+    nPriceBTC = priceBTC;
+    return true;
+}
+
+CAmount CWallet::GetPriceUSD()
+{
+    return nPriceUSD;
+}
+
+bool CWallet::SetPriceUSD(CAmount priceUSD)
+{
+    nPriceUSD = priceUSD;
+    return true;
+}
+
 void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal)
 {
     CHDChain hdChainTmp;
@@ -3120,7 +3153,11 @@ bool CWallet::GetBudgetSystemCollateralTX(CWalletTx& tx, uint256 hash, CAmount a
     int nChangePosRet = -1;
     std::string strFail = "";
     vector< CRecipient > vecSend;
+#if _MSC_VER <= 1911
+	vecSend.push_back({ scriptChange, amount, false });
+#else
     vecSend.push_back((CRecipient){scriptChange, amount, false});
+#endif
 
     CCoinControl *coinControl=NULL;
     bool success = CreateTransaction(vecSend, tx, reservekey, nFeeRet, nChangePosRet, strFail, coinControl, true, ALL_COINS, fUseInstantSend);

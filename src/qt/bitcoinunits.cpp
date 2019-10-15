@@ -31,6 +31,8 @@ bool BitcoinUnits::valid(int unit)
 {
     switch(unit)
     {
+    case BTC:
+    case USD:
     case MBGL:
     case mMBGL:
     case uMBGL:
@@ -47,6 +49,8 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
+            case BTC: return QString("BTC");
+            case USD: return QString("USD");
             case MBGL: return QString("MBGL");
             case mMBGL: return QString("mMBGL");
             case uMBGL: return QString::fromUtf8("μMBGL");
@@ -58,6 +62,8 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
+            case BTC: return QString("tBTC");
+            case USD: return QString("tUSD");
             case MBGL: return QString("tMBGL");
             case mMBGL: return QString("mtMBGL");
             case uMBGL: return QString::fromUtf8("μtMBGL");
@@ -73,6 +79,8 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
+            case BTC: return QString("BTC");
+            case USD: return QString("USD");
             case MBGL: return QString("MBGL");
             case mMBGL: return QString("Milli-MBGL (1 / 1" THIN_SP_UTF8 "000)");
             case uMBGL: return QString("Micro-MBGL (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
@@ -84,6 +92,8 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
+            case BTC: return QString("TestBTC");
+            case USD: return QString("TestUSD");
             case MBGL: return QString("TestMBGLs");
             case mMBGL: return QString("Milli-TestMBGL (1 / 1" THIN_SP_UTF8 "000)");
             case uMBGL: return QString("Micro-TestMBGL (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
@@ -97,11 +107,13 @@ qint64 BitcoinUnits::factor(int unit)
 {
     switch(unit)
     {
+    case BTC:   return 100000000;
+    case USD:   return 100000000;
     case MBGL:  return 100000000;
     case mMBGL: return 100000;
     case uMBGL: return 100;
     case duffs: return 1;
-    default:   return 100000000;
+    default:    return 100000000;
     }
 }
 
@@ -109,6 +121,8 @@ int BitcoinUnits::decimals(int unit)
 {
     switch(unit)
     {
+    case BTC: return 8;
+    case USD: return 2;
     case MBGL: return 8;
     case mMBGL: return 5;
     case uMBGL: return 2;

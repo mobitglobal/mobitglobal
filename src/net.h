@@ -685,6 +685,9 @@ public:
     int64_t nTimeConnected;
     int64_t nTimeOffset;
     int64_t nLastWarningTime;
+    int64_t nPriceUTC;
+    CAmount nPriceBTC;
+    CAmount nPriceUSD;
     CAddress addr;
     std::string addrName;
     CService addrLocal;

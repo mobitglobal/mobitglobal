@@ -626,6 +626,9 @@ private:
     int64_t nNextResend;
     int64_t nLastResend;
     bool fBroadcastTransactions;
+    int64_t nPriceUTC;
+    CAmount nPriceBTC;
+    CAmount nPriceUSD;
 
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
@@ -719,11 +722,15 @@ public:
         nNextResend = 0;
         nLastResend = 0;
         nTimeFirstKey = 0;
+        nPriceUTC = 0;
+        nPriceBTC = 0;
+        nPriceUSD = 0;
         fBroadcastTransactions = false;
         fAnonymizableTallyCached = false;
         fAnonymizableTallyCachedNonDenom = false;
         vecAnonymizableTallyCached.clear();
         vecAnonymizableTallyCachedNonDenom.clear();
+        
     }
 
     std::map<uint256, CWalletTx> mapWallet;
@@ -748,7 +755,12 @@ public:
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
 
     const CWalletTx* GetWalletTx(const uint256& hash) const;
-
+    int64_t GetPriceUTC();
+    bool SetPriceUTC(int64_t priceUTC);
+    CAmount GetPriceBTC();
+    bool SetPriceBTC(CAmount priceBTC);
+    CAmount GetPriceUSD();
+    bool SetPriceUSD(CAmount priceBTC);
     //! check whether we are allowed to upgrade (or already support) to the named feature
     bool CanSupportFeature(enum WalletFeature wf) { AssertLockHeld(cs_wallet); return nWalletMaxVersion >= wf; }
 
