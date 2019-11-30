@@ -2677,8 +2677,6 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
     nTimeConnected = GetSystemTimeInSeconds();
     nTimeOffset = 0;
     nPriceUTC = 0;
-    nPriceBTC = 0;
-    nPriceUSD = 0;
     addr = addrIn;
     addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
     nVersion = 0;
