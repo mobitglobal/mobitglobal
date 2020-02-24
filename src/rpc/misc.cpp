@@ -531,6 +531,199 @@ UniValue setmocktime(const UniValue& params, bool fHelp)
     return NullUniValue;
 }
 
+UniValue exchange(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() == 0)
+        throw runtime_error(
+            "exchange quote\n"
+            "\nFetch latest quote for exchange\n"
+            "\nArguments: none\n"
+            "\nexchange prepare amount BTCaddress MBGLaddress\n"
+            "\nPrepare an exchange request\n"
+            "\nArguments:\n"
+            "1. \"amount\"        (numeric or string, required) amount of MBGL to be exchanged.\n"
+            "2. \"BTCaddress\"    (string, required) The BTC address that the exchanged amount shoudl be sent to.\n"
+            "3. \"MBGLaddress\"   (string, required) The MBGL address that will receive the returned amount in case of a failure to convert.\n"
+            "\nexchange submit amount BTCaddress MBGLaddress token\n"
+            "\nSubmit an exchange request\n"
+            "\nArguments:\n"
+            "1. \"amount\"        (numeric or string, required) amount of MBGL to be exchanged.\n"
+            "2. \"BTCaddress\"    (string, required) The BTC address that the exchanged amount shoudl be sent to.\n"
+            "3. \"MBGLaddress\"   (string, required) The MBGL address that will receive the returned amount in case of a failure to convert.\n"
+            "4. \"token\"         (string, required) the authorization token returned by the prepare command.\n"
+        );
+
+    string strCommand = params[0].getValStr();
+
+    if (strCommand == "quote") {
+        return HelperGetExchangeQuote();
+    }
+    if (strCommand == "prepare") {
+        CAmount amount = AmountFromValue(params[1]);
+        string addrBTC = params[2].getValStr();
+        string addrMBGL = params[3].getValStr();
+
+        if (amount <= 0)
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for exchange");
+
+        if (addrBTC.length() != 33 && addrBTC.length() != 34 && addrBTC.substr(0,1) != "1" && addrBTC.substr(0, 1) != "3") {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid BTC address");
+        }
+
+        CBitcoinAddress address(addrMBGL);
+        uint160 hashBytes;
+        int type = 0;
+        if (!address.GetIndexKey(hashBytes, type)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid MBGL address");
+        }
+
+        return HelperExchangePrepare(amount, addrBTC, addrMBGL);
+    }
+    if (strCommand == "submit") {
+        CAmount amount = AmountFromValue(params[1]);
+        string addrBTC = params[2].getValStr();
+        string addrMBGL = params[3].getValStr();
+        string strToken = params[4].getValStr();
+
+        if (amount <= 0)
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for exchange");
+
+        if (addrBTC.length() != 33 && addrBTC.length() != 34 && addrBTC.substr(0, 1) != "1" && addrBTC.substr(0, 1) != "3") {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid BTC address");
+        }
+
+        CBitcoinAddress address(addrMBGL);
+        uint160 hashBytes;
+        int type = 0;
+        if (!address.GetIndexKey(hashBytes, type)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid MBGL address");
+        }
+
+        if (strToken.length() != 36) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid token");
+        }
+
+        return HelperExchangeSubmit(amount, addrBTC, addrMBGL, strToken);
+    }
+
+    return NullUniValue;
+}
+
+UniValue HelperGetExchangeQuote()
+{
+    return HelperHttpRequest("GET", "quote", "");
+}
+UniValue HelperExchangePrepare(CAmount amount, std::string addrBTC, std::string addrMBGL)
+{
+    UniValue data(UniValue::VOBJ);
+    data.push_back(Pair("amount", amount));
+    data.push_back(Pair("addrBTC", addrBTC));
+    data.push_back(Pair("addrMBGL", addrMBGL));
+    return HelperHttpRequest("POST", "prepare", data);
+}
+UniValue HelperExchangeSubmit(CAmount amount, std::string addrBTC, std::string addrMBGL, std::string strToken)
+{
+    UniValue data(UniValue::VOBJ);
+    data.push_back(Pair("amount", amount));
+    data.push_back(Pair("addrBTC", addrBTC));
+    data.push_back(Pair("addrMBGL", addrMBGL));
+    data.push_back(Pair("token", strToken));
+    return HelperHttpRequest("POST", "submit", data);
+}
+
+UniValue HelperHttpRequest(std::string strMethod, std::string strAction, UniValue content)
+{
+    try
+    {
+    string strContent = content.write();
+    boost::system::error_code error;
+    using namespace boost::asio;
+
+    // what we need
+    io_service svc;
+    ssl::context ctx(svc, ssl::context::method::sslv23_client);
+    ssl::stream<ip::tcp::socket> ssock(svc, ctx);
+    ip::tcp::resolver resolver(svc);
+    auto it = resolver.resolve({"mobitglobal.com", "443"});
+    boost::asio::connect(ssock.lowest_layer(), it); //ssock.lowest_layer().connect(it);
+    ssock.handshake(ssl::stream_base::handshake_type::client);
+
+    boost::asio::streambuf request;
+    std::ostream request_stream(&request);
+
+    // send request
+    request_stream << strMethod + " /exchange/" + strAction + " HTTP/1.1\r\n";
+    request_stream << "Host: mobitglobal.com\r\n";
+    request_stream << "User-Agent: Mobit Global Core\r\n";
+    request_stream << "Content-Type: application/json; charset=utf-8\r\n";
+    if (strMethod == "POST")
+    {
+        request_stream << "Content-Length: " + to_string(strContent.length()) + "\r\n";
+    }
+    request_stream << "Accept: */*\r\n";
+    request_stream << "Connection: close\r\n\r\n";
+    if (strMethod == "POST")
+    {
+        request_stream << strContent;
+    }
+
+    boost::asio::write(ssock, request);
+
+    std::string response;
+    do {
+        char buf[1024];
+        size_t bytes_transferred = ssock.read_some(buffer(buf), error);
+        if (!error) response.append(buf, buf + bytes_transferred);
+    } while (!error);
+
+    boost::algorithm::replace_first(response, "\r\n\r\n", "~");
+    vector<string> content;
+    boost::split(content, response, boost::is_any_of("~"));
+
+    UniValue data(content[1]);
+    return data;
+    }
+    catch (std::exception& e)
+    {
+        std::string ex = "Exception: ";
+        ex.append(e.what());
+        return UniValue(ex);
+    }
+
+}
+
+UniValue getcurrentprice(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getcurrentprice\n"
+            "\nShows the current btc and usd price\n"
+            "\nArguments: none\n"
+        );
+
+    LOCK(cs_main);
+
+    int64_t nPriceUTC = 0;
+    CAmount nPriceBTC = 0;
+    CAmount nPriceUSD = 0;
+
+#ifdef ENABLE_WALLET
+    if (pwalletMain) {
+        nPriceUTC = pwalletMain->GetPriceUTC();
+        nPriceBTC = pwalletMain->GetPriceBTC();
+        nPriceUSD = pwalletMain->GetPriceUSD();
+    }
+#endif
+
+
+    UniValue result(UniValue::VOBJ);
+    result.push_back(Pair("timeutc", nPriceUTC));
+    result.push_back(Pair("btc", ValueFromAmount(nPriceBTC)));
+    result.push_back(Pair("usd", ValueFromAmount(nPriceUSD)));
+
+    return result;
+}
+
 bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &address)
 {
     if (type == 2) {

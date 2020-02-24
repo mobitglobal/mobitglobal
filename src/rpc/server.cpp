@@ -340,7 +340,9 @@ static const CRPCCommand vRPCCommands[] =
     { "hidden",             "invalidateblock",        &invalidateblock,        true  },
     { "hidden",             "reconsiderblock",        &reconsiderblock,        true  },
     { "hidden",             "setmocktime",            &setmocktime,            true  },
+    { "hidden",             "exchange",               &exchange,               true  },
 #ifdef ENABLE_WALLET
+    { "hidden",             "getcurrentprice",         &getcurrentprice,         true },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, true},
 #endif
 
@@ -357,7 +359,7 @@ static const CRPCCommand vRPCCommands[] =
     { "mobitglobal",        "getpoolinfo",            &getpoolinfo,            true  },
     { "mobitglobal",        "sentinelping",           &sentinelping,           true  },
 #ifdef ENABLE_WALLET
-    { "mobitglobal",               "privatesend",            &privatesend,            false },
+    { "mobitglobal",        "privatesend",            &privatesend,            false },
 
     /* Wallet */
     { "wallet",             "keepass",                &keepass,                true },

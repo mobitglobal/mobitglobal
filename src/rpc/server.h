@@ -16,6 +16,9 @@
 #include <string>
 
 #include <boost/function.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <iostream>
 
 #include <univalue.h>
 
@@ -252,6 +255,8 @@ extern UniValue getwalletinfo(const UniValue& params, bool fHelp);
 extern UniValue getblockchaininfo(const UniValue& params, bool fHelp);
 extern UniValue getnetworkinfo(const UniValue& params, bool fHelp);
 extern UniValue setmocktime(const UniValue& params, bool fHelp);
+extern UniValue exchange(const UniValue& params, bool fHelp);
+extern UniValue getcurrentprice(const UniValue& params, bool fHelp);
 extern UniValue resendwallettransactions(const UniValue& params, bool fHelp);
 
 extern UniValue getrawtransaction(const UniValue& params, bool fHelp); // in rpc/rawtransaction.cpp
@@ -303,5 +308,11 @@ bool StartRPC();
 void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
+
+UniValue HelperGetExchangeQuote();
+UniValue HelperExchangePrepare(CAmount amount, std::string addrBTC, std::string addrMBGL);
+UniValue HelperExchangeSubmit(CAmount amount, std::string addrBTC, std::string addrMBGL, std::string strToken);
+UniValue HelperHttpRequest(std::string strMethod, std::string strAction, UniValue content);
+
 
 #endif // BITCOIN_RPCSERVER_H
