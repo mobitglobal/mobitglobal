@@ -2643,6 +2643,18 @@ uint64_t CConnman::GetTotalBytesSent()
     return nTotalBytesSent;
 }
 
+int64_t CConnman::GetLastNetPriceUTC()
+{
+    LOCK(cs_lastNetPriceUTC);
+    return nLastNetPriceUTC;
+}
+
+void CConnman::SetLastNetPriceUTC(int64_t nPriceUTC)
+{
+    LOCK(cs_lastNetPriceUTC);
+    nLastNetPriceUTC = nPriceUTC;
+}
+
 ServiceFlags CConnman::GetLocalServices() const
 {
     return nLocalServices;
@@ -2676,7 +2688,6 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
     nRecvBytes = 0;
     nTimeConnected = GetSystemTimeInSeconds();
     nTimeOffset = 0;
-    nPriceUTC = 0;
     addr = addrIn;
     addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
     nVersion = 0;

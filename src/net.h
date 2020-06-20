@@ -381,7 +381,8 @@ public:
 
     uint64_t GetTotalBytesRecv();
     uint64_t GetTotalBytesSent();
-
+    int64_t GetLastNetPriceUTC();
+    void SetLastNetPriceUTC(int64_t nPriceUTC);
     void SetBestHeight(int height);
     int GetBestHeight() const;
 
@@ -443,8 +444,10 @@ private:
     // Network usage totals
     CCriticalSection cs_totalBytesRecv;
     CCriticalSection cs_totalBytesSent;
+    CCriticalSection cs_lastNetPriceUTC;
     uint64_t nTotalBytesRecv;
     uint64_t nTotalBytesSent;
+    int64_t nLastNetPriceUTC;
 
     // outbound limit & stats
     uint64_t nMaxOutboundTotalBytesSentInCycle;
@@ -685,7 +688,7 @@ public:
     int64_t nTimeConnected;
     int64_t nTimeOffset;
     int64_t nLastWarningTime;
-    int64_t nPriceUTC;
+
     CAddress addr;
     std::string addrName;
     CService addrLocal;

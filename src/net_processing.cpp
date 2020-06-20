@@ -2183,35 +2183,37 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         CAmount nPriceUSD;
         vRecv >> nPriceUTC >> nPriceBTC >> nPriceUSD;
         LogPrint("net", "FXPRICE (recv)-- node: %s, time: %d, btc: %d, usd: %d \n", pfrom->addr.ToString(), nPriceUTC, nPriceBTC, nPriceUSD);
-        pfrom->nPriceUTC = nPriceUTC;
-#ifdef ENABLE_WALLET
-        if (pwalletMain) {
-            if (nPriceUTC != pwalletMain->GetPriceUTC()) {
-                pwalletMain->SetPriceUTC(nPriceUTC);
-            }
-            if (nPriceBTC != pwalletMain->GetPriceBTC()) {
-                pwalletMain->SetPriceBTC(nPriceBTC);
-            }
-            if (nPriceUSD != pwalletMain->GetPriceUSD()) {
-                pwalletMain->SetPriceUSD(nPriceUSD);
-            }
-        }
-#endif // ENABLE_WALLET
-        std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
-        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        if(nPriceUTC > connman.GetLastNetPriceUTC())
         {
-            int64_t nPingUsecWait = 0;
-            if ((0 != pnode->nPingNonceSent) && (0 != pnode->nPingUsecStart)) {
-                nPingUsecWait = GetTimeMicros() - pnode->nPingUsecStart;
+            connman.SetLastNetPriceUTC(nPriceUTC);
+#ifdef ENABLE_WALLET
+            if (pwalletMain) {
+                if (nPriceUTC != pwalletMain->GetPriceUTC()) {
+                    pwalletMain->SetPriceUTC(nPriceUTC);
+                }
+                if (nPriceBTC != pwalletMain->GetPriceBTC()) {
+                    pwalletMain->SetPriceBTC(nPriceBTC);
+                }
+                if (nPriceUSD != pwalletMain->GetPriceUSD()) {
+                    pwalletMain->SetPriceUSD(nPriceUSD);
+                }
             }
-            if (pnode->nVersion >= PROTOCOL_VERSION && (pnode->nPriceUTC < nPriceUTC) && nPingUsecWait < 10000000) { 
-                /// only send to nodes we have had a response from within 10s on PING
-                LogPrint("net", "FXPRICE (relay)-- node: %s, time: %d, btc: %d, usd: %d \n", pnode->addr.ToString(), nPriceUTC, nPriceBTC, nPriceUSD);
-                pnode->nPriceUTC = nPriceUTC;
-                connman.PushMessageWithVersion(pnode, PROTOCOL_VERSION, NetMsgType::FXPRICE, nPriceUTC, nPriceBTC, nPriceUSD);
+#endif // ENABLE_WALLET
+            std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
+            BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            {
+                int64_t nPingUsecWait = 0;
+                if ((0 != pnode->nPingNonceSent) && (0 != pnode->nPingUsecStart)) {
+                    nPingUsecWait = GetTimeMicros() - pnode->nPingUsecStart;
+                }
+                if (pnode->nVersion >= PROTOCOL_VERSION && nPingUsecWait < 10000000) { 
+                    /// only send to nodes we have had a response from within 10s on PING
+                    LogPrint("net", "FXPRICE (relay)-- node: %s, time: %d, btc: %d, usd: %d \n", pnode->addr.ToString(), nPriceUTC, nPriceBTC, nPriceUSD);
+                    connman.PushMessageWithVersion(pnode, PROTOCOL_VERSION, NetMsgType::FXPRICE, nPriceUTC, nPriceBTC, nPriceUSD);
+                }
             }
+            connman.ReleaseNodeVector(vNodesCopy);
         }
-        connman.ReleaseNodeVector(vNodesCopy);
     }
     else
     {
