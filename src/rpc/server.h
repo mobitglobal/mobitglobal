@@ -256,6 +256,7 @@ extern UniValue getblockchaininfo(const UniValue& params, bool fHelp);
 extern UniValue getnetworkinfo(const UniValue& params, bool fHelp);
 extern UniValue setmocktime(const UniValue& params, bool fHelp);
 extern UniValue exchange(const UniValue& params, bool fHelp);
+extern UniValue broadcastprice(const UniValue& params, bool fHelp);
 extern UniValue getcurrentprice(const UniValue& params, bool fHelp);
 extern UniValue resendwallettransactions(const UniValue& params, bool fHelp);
 
@@ -309,9 +310,9 @@ void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
 
-UniValue HelperGetExchangeQuote();
-UniValue HelperExchangePrepare(CAmount amount, std::string addrBTC, std::string addrMBGL);
-UniValue HelperExchangeSubmit(CAmount amount, std::string addrBTC, std::string addrMBGL, std::string strToken);
+UniValue HelperGetExchangeQuote(std::string symbol);
+UniValue HelperExchangePrepare(std::string symbol, CAmount amount, std::string addrTarget, std::string addrMBGL);
+UniValue HelperExchangeSubmit(std::string strToken);
 UniValue HelperHttpRequest(std::string strMethod, std::string strAction, UniValue content);
 
 

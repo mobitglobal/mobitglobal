@@ -535,40 +535,37 @@ UniValue exchange(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() == 0)
         throw runtime_error(
-            "exchange quote\n"
+            "exchange quote symbol\n"
             "\nFetch latest quote for exchange\n"
-            "\nArguments: none\n"
-            "\nexchange prepare amount BTCaddress MBGLaddress\n"
+            "\nArguments:\n"
+            "1. \"symbol\"        (string, required) symbol to quote.\n"
+            "\nexchange prepare symbol amount targetAddress changeAddress\n"
             "\nPrepare an exchange request\n"
             "\nArguments:\n"
-            "1. \"amount\"        (numeric or string, required) amount of MBGL to be exchanged.\n"
-            "2. \"BTCaddress\"    (string, required) The BTC address that the exchanged amount shoudl be sent to.\n"
-            "3. \"MBGLaddress\"   (string, required) The MBGL address that will receive the returned amount in case of a failure to convert.\n"
-            "\nexchange submit amount BTCaddress MBGLaddress token\n"
+            "1. \"symbol\"        (string, required) symbol to be exchanged.\n"
+            "2. \"amount\"        (numeric or string, required) amount of MBGL to be exchanged.\n"
+            "3. \"targetAddress\"    (string, required) The address that the exchanged amount should be sent to.\n"
+            "4. \"changeAddress\"   (string, required) The MBGL address that will receive the returned amount in case of a failure to complete the exchange.\n"
+            "\nexchange submit token\n"
             "\nSubmit an exchange request\n"
             "\nArguments:\n"
-            "1. \"amount\"        (numeric or string, required) amount of MBGL to be exchanged.\n"
-            "2. \"BTCaddress\"    (string, required) The BTC address that the exchanged amount shoudl be sent to.\n"
-            "3. \"MBGLaddress\"   (string, required) The MBGL address that will receive the returned amount in case of a failure to convert.\n"
-            "4. \"token\"         (string, required) the authorization token returned by the prepare command.\n"
+            "1. \"token\"         (string, required) the authorization token returned by the prepare command.\n"
         );
 
     string strCommand = params[0].getValStr();
 
-    if (strCommand == "quote") {
-        return HelperGetExchangeQuote();
+    if (strCommand == "quote" && params.size() == 2) {
+        string symbol = params[1].getValStr();
+        return HelperGetExchangeQuote(symbol);
     }
-    if (strCommand == "prepare") {
-        CAmount amount = AmountFromValue(params[1]);
-        string addrBTC = params[2].getValStr();
-        string addrMBGL = params[3].getValStr();
+    if (strCommand == "prepare" && params.size() == 5) {
+        string symbol = params[1].getValStr();
+        CAmount amount = AmountFromValue(params[2]);
+        string addrTarget = params[3].getValStr();
+        string addrMBGL = params[4].getValStr();
 
         if (amount <= 0)
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for exchange");
-
-        if (addrBTC.length() != 33 && addrBTC.length() != 34 && addrBTC.substr(0,1) != "1" && addrBTC.substr(0, 1) != "3") {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid BTC address");
-        }
 
         CBitcoinAddress address(addrMBGL);
         uint160 hashBytes;
@@ -577,59 +574,43 @@ UniValue exchange(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid MBGL address");
         }
 
-        return HelperExchangePrepare(amount, addrBTC, addrMBGL);
+        return HelperExchangePrepare(symbol, amount, addrTarget, addrMBGL);
     }
-    if (strCommand == "submit") {
-        CAmount amount = AmountFromValue(params[1]);
-        string addrBTC = params[2].getValStr();
-        string addrMBGL = params[3].getValStr();
-        string strToken = params[4].getValStr();
-
-        if (amount <= 0)
-            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for exchange");
-
-        if (addrBTC.length() != 33 && addrBTC.length() != 34 && addrBTC.substr(0, 1) != "1" && addrBTC.substr(0, 1) != "3") {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid BTC address");
-        }
-
-        CBitcoinAddress address(addrMBGL);
-        uint160 hashBytes;
-        int type = 0;
-        if (!address.GetIndexKey(hashBytes, type)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid MBGL address");
-        }
+    if (strCommand == "submit" && params.size() == 2) {
+        string strToken = params[1].getValStr();
 
         if (strToken.length() != 36) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid token");
         }
 
-        return HelperExchangeSubmit(amount, addrBTC, addrMBGL, strToken);
+        return HelperExchangeSubmit(strToken);
     }
 
     return NullUniValue;
 }
 
-UniValue HelperGetExchangeQuote()
-{
-    return HelperHttpRequest("GET", "quote", "");
-}
-UniValue HelperExchangePrepare(CAmount amount, std::string addrBTC, std::string addrMBGL)
+UniValue HelperGetExchangeQuote(std::string symbol)
 {
     UniValue data(UniValue::VOBJ);
+    data.push_back(Pair("symbol", symbol));
+    return HelperHttpRequest("POST", "quote", data);
+}
+UniValue HelperExchangePrepare(std::string symbol, CAmount amount, std::string addrTarget, std::string addrMBGL)
+{
+    UniValue data(UniValue::VOBJ);
+    data.push_back(Pair("symbol", symbol));
     data.push_back(Pair("amount", amount));
-    data.push_back(Pair("addrBTC", addrBTC));
+    data.push_back(Pair("addrTarget", addrTarget));
     data.push_back(Pair("addrMBGL", addrMBGL));
     return HelperHttpRequest("POST", "prepare", data);
 }
-UniValue HelperExchangeSubmit(CAmount amount, std::string addrBTC, std::string addrMBGL, std::string strToken)
+UniValue HelperExchangeSubmit(std::string strToken)
 {
     UniValue data(UniValue::VOBJ);
-    data.push_back(Pair("amount", amount));
-    data.push_back(Pair("addrBTC", addrBTC));
-    data.push_back(Pair("addrMBGL", addrMBGL));
     data.push_back(Pair("token", strToken));
     return HelperHttpRequest("POST", "submit", data);
 }
+
 
 UniValue HelperHttpRequest(std::string strMethod, std::string strAction, UniValue content)
 {
@@ -690,6 +671,62 @@ UniValue HelperHttpRequest(std::string strMethod, std::string strAction, UniValu
         return UniValue(ex);
     }
 
+}
+
+
+UniValue broadcastprice(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 3)
+        throw runtime_error(
+            "broadcastprice timeutc, pricebtc, priceusd\n"
+            "\nBroadcasts the current btc and usd price\n"
+            "\nArguments:\n"
+            "1. \"timeUTC\"      (numeric or string, required) UTC timestamp of price.\n"
+            "2. \"priceBTC\"      (numeric or string, required) The price in BTC. eg 0.1\n"
+            "3. \"priceUSD\"      (numeric or string, required) The price in USD. eg 0.1\n"
+        );
+
+    LOCK(cs_main);
+
+    int64_t nPriceUTC = 0;
+    ParseInt64(params[0].getValStr(), &nPriceUTC);
+    if (nPriceUTC <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid time");
+
+    CAmount nPriceBTC = AmountFromValue(params[1]);
+    if (nPriceBTC <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid price for BTC");
+
+    CAmount nPriceUSD = AmountFromValue(params[2]);
+    if (nPriceUSD <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid price for USD");
+
+#ifdef ENABLE_WALLET
+    if (pwalletMain) {
+        pwalletMain->SetPriceUTC(nPriceUTC);
+        pwalletMain->SetPriceBTC(nPriceBTC);
+        pwalletMain->SetPriceUSD(nPriceUSD);
+    }
+#endif
+
+    std::vector<CNode*> vNodesCopy = g_connman->CopyNodeVector();
+
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+    {
+        int64_t nPingUsecWait = 0;
+        if ((0 != pnode->nPingNonceSent) && (0 != pnode->nPingUsecStart)) {
+            nPingUsecWait = GetTimeMicros() - pnode->nPingUsecStart;
+        }
+        if (pnode->nVersion >= PROTOCOL_VERSION && nPingUsecWait < 10000000) {
+            /// only send to nodes we have had a response from within 10s on PING
+            LogPrint("net", "FXPRICE (relay)-- node: %s, utc: %d, btc: %d, usd: %d \n", pnode->addr.ToString(), nPriceUTC, nPriceBTC, nPriceUSD);
+            g_connman->PushMessageWithVersion(pnode, PROTOCOL_VERSION, NetMsgType::FXPRICE, nPriceUTC, nPriceBTC, nPriceUSD);
+        }
+    }
+
+    g_connman->ReleaseNodeVector(vNodesCopy);
+
+    return NullUniValue;
 }
 
 UniValue getcurrentprice(const UniValue& params, bool fHelp)
